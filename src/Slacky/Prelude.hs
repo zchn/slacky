@@ -1,7 +1,7 @@
 module Slacky.Prelude
-  ( Text.Text
+  ( DT.Text
   , LText
-  , ByteString.ByteString
+  , DB.ByteString
   , LByteString
   , implementMe
   , pack
@@ -11,42 +11,37 @@ module Slacky.Prelude
   , format
   ) where
 
--- https://www.stackage.org/lts-6.11/package/transformers
+
 import Control.Monad.IO.Class (MonadIO, liftIO)
-
--- https://www.stackage.org/lts-6.11/package/bytestring
-import qualified Data.ByteString         as ByteString
-import qualified Data.ByteString.Lazy    as LByteString
-
--- https://www.stackage.org/lts-6.11/package/text
-import qualified Data.Text               as Text
-import qualified Data.Text.Lazy          as LText
-import qualified Data.Text.Lazy.Encoding as LText
-
--- https://www.stackage.org/lts-6.11/package/text-format-0.3.1.1
 import Data.Text.Format (Only(..), format)
+import qualified Data.ByteString         as DB
+import qualified Data.ByteString.Lazy    as DBL
+import qualified Data.Text as DT
+import qualified Data.Text.Lazy as DTL
 
-type LByteString = LByteString.ByteString
+type LByteString = DBL.ByteString
 
-type LText = LText.Text
+type LText = DTL.Text
 
 implementMe :: a
 implementMe = error "Implement me!"
 
-class Pack a where
-  pack :: String -> a
+class Pack a  where
+    pack :: String -> a
 
-instance Pack Text.Text where
-  pack = Text.pack
+instance Pack DT.Text where
+    pack = DT.pack
 
-instance Pack LText.Text where
-  pack = LText.pack
+instance Pack DTL.Text where
+    pack = DTL.pack
 
-class Unpack a where
-  unpack :: a -> String
+class Unpack a  where
+    unpack :: a -> String
 
-instance Unpack Text.Text where
-  unpack = Text.unpack
+instance Unpack DT.Text where
+    unpack = DT.unpack
 
-io :: MonadIO m => IO a -> m a
+io
+    :: MonadIO m
+    => IO a -> m a
 io = liftIO

@@ -3,7 +3,6 @@ module Slacky.Lifted where
 
 import Slacky.Monad
 import Slacky.Prelude
-
 -- https://www.stackage.org/lts-6.11/package/base
 import Control.Exception
 
@@ -16,19 +15,19 @@ liftedCatch m k = do
   unlift <- unliftIO
   io (catch (unlift m) (\e -> unlift (k e)))
 
+-- | Like 'bracket', but in the Slacky monad.
 liftedBracket :: Slacky a -> (a -> Slacky b) -> (a -> Slacky c) -> Slacky c
 liftedBracket open close inner = do
-  unlifta <- unliftIO
-  unliftb <- unliftIO
-  unliftc <- unliftIO
-
-  io (bracket (unlifta open) (\a -> unliftb (close a)) (\a -> unliftc (inner a)))
+  unliftA <- unliftIO
+  unliftB <- unliftIO
+  unliftC <- unliftIO
+  io $ bracket (unliftA open) (unliftB . close) (unliftC
+                                                 . inner)
 
 -- | Like 'runClientWithStream', but in the Slacky monad.
 liftedRunClientWithStream
   :: WebSockets.Stream -> String -> String -> WebSockets.ConnectionOptions
   -> WebSockets.Headers -> (WebSockets.Connection -> Slacky a) -> Slacky a
-liftedRunClientWithStream stream host port opts headers app = do
+liftedRunClientWithStream stream host path options headers client = do
   unlift <- unliftIO
-  io (WebSockets.runClientWithStream stream host port opts headers
-    (\conn -> unlift (app conn)))
+  io $ WebSockets.runClientWithStream stream host path options headers (unlift . client)

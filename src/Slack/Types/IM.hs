@@ -1,21 +1,28 @@
+{-# LANGUAGE DeriveGeneric #-}
+
 module Slack.Types.IM where
 
 import Slack.Types.User (UserId)
 import Slacky.Prelude
-
 -- https://www.stackage.org/lts-6.11/package/aeson
 import Data.Aeson
+import GHC.Generics (Generic)
 
 type IMId = Text
 
+data RawIm = RawIm
+    { id :: IMId
+    , user :: UserId
+    } deriving (Generic,Show)
+
+instance FromJSON RawIm
+
 data IM = IM
-  { imId   :: IMId
-  , imUser :: UserId
-  } deriving (Eq, Show)
+    { imId :: IMId
+    , imUser :: UserId
+    } deriving (Eq,Show)
 
 instance FromJSON IM where
-  parseJSON =
-    withObject "object" $ \o -> do
-      ident <- o .: "id"
-      user  <- o .: "user"
-      pure (IM ident user)
+    parseJSON v = do
+        raw <- parseJSON v
+        return $ IM (Slack.Types.IM.id raw) (user raw)
